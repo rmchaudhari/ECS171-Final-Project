@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Model Details - Diabetes Prediction{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">
+                <i class="fas fa-brain text-primary me-3"></i>
+                Neural Network Model Details
+            </h1>
+            <p class="lead text-center text-muted">Architecture and Training Configuration</p>
+        </div>
+    </div>
+
+    <!-- Model Architecture -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-sitemap me-2"></i>Model Architecture</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5>Model Type: <span class="badge bg-info">{{ architecture.type }}</span></h5>
+                    </div>
+                    
+                    <h6>Network Layers:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Layer</th>
+                                    <th>Type</th>
+                                    <th>Units/Rate</th>
+                                    <th>Activation</th>
+                                    <th>Regularization</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for layer in architecture.layers %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td><span class="badge bg-secondary">{{ layer.type }}</span></td>
+                                    <td>
+                                        {% if layer.units %}
+                                            {{ layer.units }} units
+                                        {% elif layer.rate %}
+                                            {{ layer.rate }} rate
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if layer.activation %}
+                                            <span class="badge bg-success">{{ layer.activation }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if layer.regularization %}
+                                            <span class="badge bg-warning text-dark">{{ layer.regularization }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Configuration -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Training Config</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Optimizer:</strong>
+                            <span class="badge bg-primary">{{ architecture.optimizer }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Loss Function:</strong>
+                            <span class="badge bg-primary">{{ architecture.loss }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Epochs:</strong>
+                            <span>{{ architecture.training.epochs }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Batch Size:</strong>
+                            <span>{{ architecture.training.batch_size }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Validation:</strong>
+                            <span class="badge bg-info">{{ architecture.training.validation_split }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Early Stopping:</strong>
+                            <span class="badge bg-success">{{ architecture.training.early_stopping }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Performance Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Cross-Validation Performance (5-Fold)</h6>
+                            <canvas id="cvChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Final Test Set Results</h6>
+                            <div class="row text-center">
+                                <div class="col-6 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h5 class="text-primary">{{ "%.1f"|format(results.test_metrics.accuracy * 100) }}%</h5>
+                                            <p class="mb-0">Accuracy</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h5 class="text-success">{{ "%.1f"|format(results.test_metrics.precision * 100) }}%</h5>
+                                            <p class="mb-0">Precision</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h5 class="text-warning">{{ "%.1f"|format(results.test_metrics.recall * 100) }}%</h5>
+                                            <p class="mb-0">Recall</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h5 class="text-danger">{{ "%.1f"|format(results.test_metrics.f1 * 100) }}%</h5>
+                                            <p class="mb-0">F1-Score</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script id="chart-data" type="application/json">
+{{ results.cv_metrics | tojson }}
+</script>
+<script>
+// Cross-validation chart
+const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+const cvData = [
+    chartData.accuracy.mean,
+    chartData.precision.mean,
+    chartData.recall.mean,
+    chartData.f1.mean
+];
+
+const ctx = document.getElementById('cvChart').getContext('2d');
+const cvChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+        datasets: [{
+            label: 'Cross-Validation Performance',
+            data: cvData,
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(255, 99, 132, 0.6)'
+            ],
+            borderColor: [
+                'rgba(54, 162, 235, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 1.0
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 
