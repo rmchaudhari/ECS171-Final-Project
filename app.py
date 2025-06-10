@@ -113,7 +113,12 @@ def model_details():
     return render_template("model_details.html", 
                          results=MODEL_RESULTS,
                          architecture=model_architecture)
-
+    
+@app.route("/video-portal")
+def video_portal():
+    """Video portal for project demonstrations"""
+    return render_template("video_portal.html")
+    
 if __name__ == "__main__":
     print("Starting Diabetes Prediction Dashboard...")
     print("Loading dataset and creating visualizations...")
